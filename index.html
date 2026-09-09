@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>MetalAudit — Windows Security Control Assurance</title>
+
+  <meta
+    name="description"
+    content="MetalAudit helps security and IT teams verify the effective state of Windows security controls with independent endpoint evidence."
+  />
+
+  <meta name="theme-color" content="#070b12" />
+
+  <style>
+    :root {
+      --bg: #070b12;
+      --bg-soft: #0b111c;
+      --card: rgba(255, 255, 255, 0.045);
+      --card-strong: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f7f9fc;
+      --muted: #9aa7b8;
+      --blue: #55a8ff;
+      --blue-2: #7bc0ff;
+      --green: #65e0a3;
+      --warning: #f4c76c;
+      --max-width: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(49, 126, 255, 0.16), transparent 36rem),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max-width));
+      margin: 0 auto;
+    }
+
+    nav {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #1683ff, #69bcff);
+      color: #06101e;
+      font-weight: 900;
+      box-shadow: 0 0 30px rgba(44, 145, 255, 0.25);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      padding: 9px 15px;
+      color: var(--text) !important;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .hero {
+      padding: 115px 0 95px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 11px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(85,168,255,0.25);
+      border-radius: 999px;
+      background: rgba(40,128,255,0.07);
+      color: var(--blue-2);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    h1 {
+      max-width: 960px;
+      margin: 0 auto;
+      font-size: clamp(46px, 7vw, 82px);
+      line-height: 1.02;
+      letter-spacing: -0.055em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #ffffff, #9bd0ff 70%, #6eafff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-description {
+      max-width: 740px;
+      margin: 28px auto 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 20px);
+    }
+
+    .hero-actions {
+      margin-top: 34px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 21px;
+      border-radius: 10px;
+      font-weight: 650;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .button-primary {
+      color: #06111f;
+      background: linear-gradient(135deg, #6cbcff, #3a94ff);
+      box-shadow: 0 10px 40px rgba(43, 145, 255, 0.2);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .button-secondary {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+
+    .button-secondary:hover {
+      background: rgba(255,255,255,0.07);
+    }
+
+    .hero-note {
+      margin-top: 18px;
+      color: #788598;
+      font-size: 12px;
+    }
+
+    .proof-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.025);
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .proof-item {
+      padding: 23px 20px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .proof-item:last-child {
+      border-right: 0;
+    }
+
+    .proof-title {
+      font-size: 14px;
+      font-weight: 650;
+      color: #e9f0fa;
+    }
+
+    .proof-sub {
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    section {
+      padding: 100px 0;
+    }
+
+    .section-label {
+      margin-bottom: 12px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      max-width: 760px;
+      font-size: clamp(34px, 5vw, 52px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .section-intro {
+      max-width: 700px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      padding: 28px;
+    }
+
+    .card h3 {
+      margin-bottom: 11px;
+      font-size: 19px;
+      letter-spacing: -0.02em;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .comparison {
+      margin-top: 48px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #090e17;
+    }
+
+    .comparison-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 13px 22px;
+      background: rgba(255,255,255,0.035);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 66px;
+      border-bottom: 1px solid rgba(255,255,255,0.055);
+    }
+
+    .comparison-row:last-child {
+      border-bottom: none;
+    }
+
+    .comparison-cell {
+      padding: 19px 22px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 14px;
+    }
+
+    .comparison-cell:first-child {
+      border-right: 1px solid rgba(255,255,255,0.055);
+      color: #c2ccd9;
+    }
+
+    .status {
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-weight: 700;
+    }
+
+    .status-cloud {
+      color: var(--blue-2);
+      background: rgba(85,168,255,0.1);
+    }
+
+    .status-endpoint {
+      color: var(--green);
+      background: rgba(101,224,163,0.1);
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 50px;
+    }
+
+    .workflow-step {
+      position: relative;
+      min-height: 190px;
+      padding: 25px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--card);
+    }
+
+    .step-number {
+      margin-bottom: 28px;
+      color: #67758a;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .workflow-step h3 {
+      margin-bottom: 7px;
+      font-size: 17px;
+    }
+
+    .workflow-step p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .evidence-box {
+      margin-top: 50px;
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 24px;
+    }
+
+    .terminal {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: #05080d;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .terminal-bar {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 15px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #344052;
+    }
+
+    .terminal-body {
+      padding: 23px;
+      line-height: 1.85;
+      color: #b4c0cf;
+    }
+
+    .terminal-key {
+      color: #6d7b8f;
+    }
+
+    .terminal-value {
+      color: #e7edf6;
+    }
+
+    .terminal-fail {
+      color: #ff8d8d;
+    }
+
+    .terminal-good {
+      color: #70e1a8;
+    }
+
+    .trust-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .trust-item {
+      padding: 21px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--card);
+    }
+
+    .trust-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .trust-item span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pilot {
+      padding: 65px;
+      border: 1px solid rgba(85,168,255,0.22);
+      border-radius: 22px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(52,143,255,0.13), transparent 28rem),
+        rgba(255,255,255,0.025);
+    }
+
+    .pilot h2 {
+      margin: 0 auto;
+    }
+
+    .pilot p {
+      max-width: 620px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .pilot .hero-actions {
+      margin-top: 27px;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding: 35px 0 45px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: #788598;
+      font-size: 13px;
+    }
+
+    .footer-brand {
+      color: #b7c1ce;
+      font-weight: 600;
+    }
+
+    @media (max-width: 850px) {
+      .nav-links a:not(.nav-cta) {
+        display: none;
+      }
+
+      .hero {
+        padding: 85px 0 70px;
+      }
+
+      .proof-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .proof-item:nth-child(2) {
+        border-right: 0;
+      }
+
+      .proof-item:nth-child(-n+2) {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .problem-grid,
+      .evidence-box {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .pilot {
+        padding: 45px 24px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(calc(100% - 28px), var(--max-width));
+      }
+
+      nav {
+        height: 66px;
+      }
+
+      .hero {
+        padding-top: 70px;
+      }
+
+      .proof-strip,
+      .workflow {
+        grid-template-columns: 1fr;
+      }
+
+      .proof-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .proof-item:last-child {
+        border-bottom: 0;
+      }
+
+      .comparison-header {
+        display: none;
+      }
+
+      .comparison-row {
+        grid-template-columns: 1fr;
+      }
+
+      .comparison-cell:first-child {
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.055);
+      }
+
+      section {
+        padding: 75px 0;
+      }
+
+      .footer-content {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="container">
+    <nav>
+      <a class="brand" href="#">
+        <span class="brand-mark">M</span>
+        <span>MetalAudit</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#why">Why MetalAudit</a>
+        <a href="#workflow">How it works</a>
+        <a href="#assurance">Assurance</a>
+        <a class="nav-cta" href="#pilot">Pilot program</a>
+      </div>
+    </nav>
+  </header>
+
+
+  <main>
+
+    <section class="hero container">
+
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Windows-first security control assurance
+      </div>
+
+      <h1>
+        Your console says it's configured.
+        <span class="gradient-text">MetalAudit checks what is actually there.</span>
+      </h1>
+
+      <p class="hero-description">
+        MetalAudit is being built to help IT and security teams independently
+        verify the effective state of Windows security controls, preserve
+        technical evidence, and identify discrepancies that deserve investigation.
+      </p>
+
+      <div class="hero-actions">
+        <a class="button button-primary" href="#pilot">
+          Request pilot access
+        </a>
+
+        <a class="button button-secondary" href="#workflow">
+          See the approach
+        </a>
+      </div>
+
+      <p class="hero-note">
+        Early-stage product · Windows-first · Pilot program
+      </p>
+
+    </section>
+
+
+    <div class="container">
+      <div class="proof-strip">
+
+        <div class="proof-item">
+          <div class="proof-title">Independent evidence</div>
+          <div class="proof-sub">Observe the endpoint directly</div>
+        </div>
+
+        <div class="proof-item">
+          <div class="proof-title">Explainable results</div>
+          <div class="proof-sub">Evidence before conclusions</div>
+        </div>
+
+        <div class="proof-item">
+          <div class="proof-title">Windows-first</div>
+          <div class="proof-sub">Focused endpoint assurance</div>
+        </div>
+
+        <div class="proof-item">
+          <div class="proof-title">Built for trust</div>
+          <div class="proof-sub">Fail closed when evidence is insufficient</div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <section id="why">
+      <div class="container">
+
+        <div class="section-label">The problem</div>
+
+        <h2>
+          Configured does not always mean effective.
+        </h2>
+
+        <p class="section-intro">
+          Modern Windows environments can be managed through multiple layers.
+          A management console can describe intended or reported state, while the
+          endpoint itself remains the source of truth for what is actually effective.
+        </p>
+
+        <div class="problem-grid">
+
+          <article class="card">
+            <h3>Management state</h3>
+            <p>
+              Policies, assignments and management platforms describe what an
+              organization expects or believes is configured.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3>Endpoint state</h3>
+            <p>
+              MetalAudit focuses on collecting independent evidence from Windows
+              to establish what can actually be observed on the device.
+            </p>
+          </article>
+
+        </div>
+
+
+        <div class="comparison">
+
+          <div class="comparison-header">
+            <div>Management view</div>
+            <div>Assurance view</div>
+          </div>
+
+          <div class="comparison-row">
+            <div class="comparison-cell">
+              <span class="status status-cloud">EXPECTED</span>
+              Security control enabled
+            </div>
+
+            <div class="comparison-cell">
+              <span class="status status-endpoint">OBSERVED</span>
+              Effective endpoint state
+            </div>
+          </div>
+
+          <div class="comparison-row">
+            <div class="comparison-cell">
+              Policy reported successfully
+            </div>
+
+            <div class="comparison-cell">
+              Evidence independently collected
+            </div>
+          </div>
+
+          <div class="comparison-row">
+            <div class="comparison-cell">
+              Configuration changed
+            </div>
+
+            <div class="comparison-cell">
+              Historical regression can be investigated
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <section id="workflow">
+      <div class="container">
+
+        <div class="section-label">How it works</div>
+
+        <h2>
+          From expectation to evidence.
+        </h2>
+
+        <p class="section-intro">
+          MetalAudit is designed around an assurance workflow rather than a
+          simple checklist of security settings.
+        </p>
+
+        <div class="workflow">
+
+          <div class="workflow-step">
+            <div class="step-number">01</div>
+            <h3>Observe</h3>
+            <p>
+              Collect structured, read-only evidence about relevant Windows
+              security controls.
+            </p>
+          </div>
+
+          <div class="workflow-step">
+            <div class="step-number">02</div>
+            <h3>Compare</h3>
+            <p>
+              Separate intended state from independently observed effective state.
+            </p>
+          </div>
+
+          <div class="workflow-step">
+            <div class="step-number">03</div>
+            <h3>Explain</h3>
+            <p>
+              Preserve provenance, confidence and evidence instead of hiding
+              uncertainty behind a binary result.
+            </p>
+          </div>
+
+          <div class="workflow-step">
+            <div class="step-number">04</div>
+            <h3>Revalidate</h3>
+            <p>
+              Re-check a control after corrective action and preserve the
+              before-and-after history.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <section id="assurance">
+      <div class="container">
+
+        <div class="section-label">Assurance</div>
+
+        <h2>
+          Evidence first. Confidence second. Claims last.
+        </h2>
+
+        <p class="section-intro">
+          Security tools lose trust when they imply certainty that the evidence
+          does not support. MetalAudit is designed to make uncertainty explicit.
+        </p>
+
+
+        <div class="evidence-box">
+
+          <div class="terminal">
+
+            <div class="terminal-bar">
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+            </div>
+
+            <div class="terminal-body">
+
+              <div>
+                <span class="terminal-key">CONTROL</span>
+                &nbsp;&nbsp;&nbsp;
+                <span class="terminal-value">Windows security control</span>
+              </div>
+
+              <div>
+                <span class="terminal-key">EXPECTED</span>
+                &nbsp;&nbsp;
+                <span class="terminal-value">Enabled</span>
+              </div>
+
+              <div>
+                <span class="terminal-key">OBSERVED</span>
+                &nbsp;&nbsp;
+                <span class="terminal-fail">Mismatch</span>
+              </div>
+
+              <div>
+                <span class="terminal-key">RESULT</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="terminal-fail">FAIL</span>
+              </div>
+
+              <div>
+                <span class="terminal-key">CONFIDENCE</span>
+                &nbsp;
+                <span class="terminal-good">HIGH</span>
+              </div>
+
+              <div>
+                <span class="terminal-key">ROOT CAUSE</span>
+                &nbsp;
+                <span class="terminal-value">Not established</span>
+              </div>
+
+              <div>
+                <span class="terminal-key">EVIDENCE</span>
+                &nbsp;&nbsp;
+                <span class="terminal-value">Preserved</span>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="trust-list">
+
+            <div class="trust-item">
+              <strong>Observed facts stay separate from inference.</strong>
+              <span>
+                A mismatch can be demonstrated without inventing why it happened.
+              </span>
+            </div>
+
+            <div class="trust-item">
+              <strong>Insufficient evidence is explicit.</strong>
+              <span>
+                When MetalAudit cannot establish a result confidently, it can
+                classify the outcome as inconclusive instead of guessing.
+              </span>
+            </div>
+
+            <div class="trust-item">
+              <strong>History matters.</strong>
+              <span>
+                Assurance is more useful when teams can understand when a control
+                changed and whether a correction restored the expected state.
+              </span>
+            </div>
+
+            <div class="trust-item">
+              <strong>Designed to complement existing tooling.</strong>
+              <span>
+                MetalAudit is not intended to replace endpoint management, EDR
+                or Microsoft security platforms.
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <section id="pilot">
+      <div class="container">
+
+        <div class="pilot">
+
+          <div class="section-label">Early pilot program</div>
+
+          <h2>
+            Built with MSPs and Windows teams in mind.
+          </h2>
+
+          <p>
+            MetalAudit is currently being validated with a small number of
+            organizations and Microsoft-focused service providers. We are looking
+            for technical feedback from teams that manage real Windows environments.
+          </p>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="mailto:YOUR_EMAIL_HERE">
+              Request a short demo
+            </a>
+          </div>
+
+          <p class="hero-note">
+            10–15 minute introduction · No commitment
+          </p>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <footer>
+    <div class="container footer-content">
+
+      <div>
+        <span class="footer-brand">MetalAudit</span>
+        · Windows Security Control Assurance
+      </div>
+
+      <div>
+        © 2026 MetalAudit
+      </div>
+
+    </div>
+  </footer>
+
+</body>
+</html>
